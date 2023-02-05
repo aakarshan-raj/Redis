@@ -22,10 +22,21 @@ static void do_something(int fd){
 
     char wbuf[] = "World";
 
-    write(fd,wbuf,strlen(wbuf));
-
+    int w = write(fd,wbuf,strlen(wbuf));
+  if(w<0){
+        perror("No one can listen to you :(");
+        exit(1);
+    }
     //the write
 }
+void *get_in_addr(struct sockaddr *sa){
+   if(sa->sa_family == AF_INET){
+   return &(((struct sockaddr_in*)sa)->sin_addr); 
+   }
+   return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+
 
 int main(int argc,char **argv){
 
@@ -68,7 +79,7 @@ if(listen(sockfd,BACKLOG) == -1){
    perror("5.listening");
    exit(1);
 }
-
+char addl[100];
 while(true){
     struct sockaddr_storage client_addr;
     socklen_t client_size = sizeof client_addr;
@@ -77,9 +88,14 @@ while(true){
         perror("6.Accept");
         continue;
     }
+    // inet_ntop(client_addr.ss_family,
+    // get_in_addr(((struct sockaddr*)&client_addr))
+    // ,addl,
+    // sizeof addl);
+    // printf("%s \n",addl);
     do_something(accept_fd);
-
-    close(accept_fd);
+    close(accept_fd);    
+    
    
 
 }
