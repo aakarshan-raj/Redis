@@ -7,9 +7,32 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <unistd.h>
-#define PORT "3000"
+#define BACKLOG 10
+
+
+static void do_something(int fd){
+    //read first 
+    char rbuf[64] = {};
+    ssize_t n = read(fd,rbuf,sizeof(rbuf)-1);
+    if(n<0){
+        perror("Error reading");
+        exit(1);
+    }
+    printf("Client say %s\n",rbuf);
+
+    char wbuf[] = "World";
+
+    write(fd,wbuf,strlen(wbuf));
+
+    //the write
+}
 
 int main(int argc,char **argv){
+
+if(argc < 2){
+    printf("Provide : [PORT]\n");
+    exit(1);
+}
 
 struct addrinfo hint,*res,*p;
 memset(&hint,0,sizeof hint); //Important, else produces bad value for ai flag
@@ -19,9 +42,9 @@ hint.ai_family = AF_UNSPEC;
 hint.ai_socktype = SOCK_STREAM;
 hint.ai_flags = AI_PASSIVE;  //set server IP
 
-int rv = getaddrinfo(NULL,PORT,&hint,&res);
+int rv = getaddrinfo(NULL,argv[1],&hint,&res);
 if(rv == -1){
-    fprintf(stderr,"1. %s \n",gai_strerror(rv));
+    fprintf(stderr,"1. ons for the actu%s \n",gai_strerror(rv));
     exit(1);
 }
 p = res;
@@ -41,9 +64,34 @@ if(bind(sockfd,p->ai_addr,p->ai_addrlen)==-1){
    exit(1); 
 }
 
+if(listen(sockfd,BACKLOG) == -1){
+   perror("5.listening");
+   exit(1);
+}
+
+while(true){
+    struct sockaddr_storage client_addr;
+    socklen_t client_size = sizeof client_addr;
+    int accept_fd = accept(sockfd,(struct sockaddr*)&client_addr,&client_size);
+    if(accept_fd < 0){
+        perror("6.Accept");
+        continue;
+    }
+    do_something(accept_fd);
+
+    close(accept_fd);
+   
+
+}
+
+close(sockfd);
 return 0;
 
 }
+
+
+
+
 
 
 
