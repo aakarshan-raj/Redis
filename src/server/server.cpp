@@ -16,7 +16,7 @@ memset(&hint,0,sizeof hint); //Important, else produces bad value for ai flag
 int yes = 1;
 int sockfd;
 hint.ai_family = AF_UNSPEC;
-hint.ai_protocol = SOCK_STREAM;
+hint.ai_socktype = SOCK_STREAM;
 hint.ai_flags = AI_PASSIVE;  //set server IP
 
 int rv = getaddrinfo(NULL,PORT,&hint,&res);
